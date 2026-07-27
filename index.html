@@ -296,9 +296,62 @@
                 font-size: 17px;
             }
         }
+        /* ===== Password Gate ===== */
+        .gate-overlay {
+            position: fixed;
+            inset: 0;
+            background: #f0f2f5;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 40px 36px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+        }
+        .gate-card .icon { font-size: 40px; margin-bottom: 12px; }
+        .gate-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .gate-card .hint { font-size: 13px; color: #888; margin-bottom: 20px; }
+        .gate-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .gate-card input:focus { border-color: #4f6ef7; }
+        .gate-card .error { color: #e53e3e; font-size: 13px; margin-top: 8px; display: none; }
+
+        /* ===== Main content hidden state ===== */
+        .main-content.blurred { filter: blur(8px); pointer-events: none; }
     </style>
 </head>
 <body>
+
+    <!-- Password Gate -->
+    <div class="gate-overlay" id="gateOverlay">
+        <div class="gate-card">
+            <div class="icon">🔐</div>
+            <h2>输入密码观看课程</h2>
+            <p class="hint">请向老师索取访问密码</p>
+            <input type="password" id="gatePassword" placeholder="请输入密码" autofocus>
+            <p class="error" id="gateError">密码错误，请重试</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
 
     <!-- Header -->
     <header class="header">
@@ -446,6 +499,33 @@
             div.textContent = str;
             return div.innerHTML;
         }
+
+        // ============================================================
+        // Password Gate
+        // ============================================================
+        const gateOverlay = document.getElementById('gateOverlay');
+        const gatePassword = document.getElementById('gatePassword');
+        const gateError = document.getElementById('gateError');
+        const mainContent = document.getElementById('mainContent');
+
+        // Check if already authenticated
+        if (localStorage.getItem('_course_auth') === '1') {
+            gateOverlay.classList.add('hidden');
+        }
+
+        gatePassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = gatePassword.value.trim();
+                if (input === COURSE_PASSWORD) {
+                    localStorage.setItem('_course_auth', '1');
+                    gateOverlay.classList.add('hidden');
+                    gateError.style.display = 'none';
+                } else {
+                    gateError.style.display = 'block';
+                    gatePassword.value = '';
+                }
+            }
+        });
 
         // Init
         renderVideoList();
