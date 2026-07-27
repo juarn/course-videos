@@ -1,0 +1,14 @@
+# Whisper 模型和工具 (太大，不需要上传)
+ggml-*.bin
+whisper-cpp/
+whisper-cpp.zip
+
+# 临时音频文件
+*.wav
+
+# Python 脚本
+translate_srt.py
+
+# 系统文件
+.DS_Store
+Thumbs.db
