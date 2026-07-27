@@ -513,10 +513,18 @@
             gateOverlay.classList.add('hidden');
         }
 
-        gatePassword.addEventListener('keydown', (e) => {
+        async function checkPassword(input) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input.trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex === COURSE_PASSWORD_HASH;
+        }
+
+        gatePassword.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
-                const input = gatePassword.value.trim();
-                if (input === COURSE_PASSWORD) {
+                if (await checkPassword(gatePassword.value)) {
                     localStorage.setItem('_course_auth', '1');
                     gateOverlay.classList.add('hidden');
                     gateError.style.display = 'none';
